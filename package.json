@@ -1,0 +1,38 @@
+{
+  "name": "NFTServices",
+  "version": "1.0.0",
+  "description": "metis project",
+  "main": "index.js",
+  "dependencies": {
+    "@openzeppelin/contract-loader": "^0.6.1",
+    "@openzeppelin/contracts": "^3.4.1",
+    "@uniswap/v2-core": "^1.0.1",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "bignumber": "^1.1.0",
+    "csv-parser": "^3.0.0",
+    "dotenv": "^8.2.0",
+    "truffle": "^5.1.40",
+    "truffle-debugger": "^5.0.26",
+    "web3": "^1.2.11",
+    "web3-eth-contract": "^1.2.11"
+  },
+  "devDependencies": {
+    "@openzeppelin/cli": "^2.8.2",
+    "@openzeppelin/test-helpers": "^0.5.6",
+    "truffle-hdwallet-provider": "^1.0.17"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "env": "npx ganache-cli --deterministic & > /dev/null"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bossyuansu/metis.git"
+  },
+  "author": "Yuan Su",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/bossyuansu/metis/issues"
+  },
+  "homepage": "https://github.com/bossyuansu/metis#readme"
+}
