@@ -9,7 +9,7 @@ contract NFTExchange is Ownable{
     
     using SafeMath for uint256;
 
-    event NewListing(address owner, uint256 index, address tokenaddr, uint256 tokenid); 
+    event NewListing(address owner, uint256 index, address tokenaddr, uint256 tokenid, uint256 price); 
     event CloseListing(address owner, uint256 index, address purchaser, address tokenaddr, uint256 tokenid, uint256 price); 
 
    
@@ -71,6 +71,7 @@ contract NFTExchange is Ownable{
         require(settlementToken.transferFrom(purchaser, l.owner, l.price), "fund transfer failed");
         IERC721 token = IERC721(l.tokenaddress);
         require(token.transfer(purchaser, l.tokenid), "token transfer failed");
+        emit CloseListing(l.owner, index, purchaser, l.tokenaddress, l.tokenid, l.price);
         _removeFromListing(index);
     }
 
@@ -80,6 +81,7 @@ contract NFTExchange is Ownable{
         Listing l memory = listings[index];
         require(l.owern == owner, "Only owner can remove");
         require(l.status == STATUS.OPEN, "status is not open");
+        emit CloseListing(l.owner, index, address(0), l.tokenaddress, l.tokenid, l.price);
         _removeFromListing(index);
     }
     
