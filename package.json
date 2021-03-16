@@ -4,6 +4,7 @@
   "description": "metis project",
   "main": "index.js",
   "dependencies": {
+    "@eth-optimism/solc": "^0.6.12-alpha.1",
     "@openzeppelin/contract-loader": "^0.6.1",
     "@openzeppelin/contracts": "^3.4.1",
     "@uniswap/v2-core": "^1.0.1",

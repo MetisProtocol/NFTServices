@@ -1,4 +1,4 @@
-pragma solidity >=0.4.22 <0.6.0;
+pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -67,7 +67,7 @@ contract NFTExchange is Ownable{
     function closeListing(uint256 index, address purchaser) public {
 
         address owner = msg.sender;
-        Listing l memory = listings[index];
+        Listing memory l = listings[index];
         require(l.status == STATUS.OPEN, "status is not open");
         require(settlementToken.transferFrom(purchaser, l.owner, l.price), "fund transfer failed");
         IERC721 token = IERC721(l.tokenaddress);
@@ -79,7 +79,7 @@ contract NFTExchange is Ownable{
     function removeListing(uint256 index) public {
 
         address owner = msg.sender;
-        Listing l memory = listings[index];
+        Listing memory l = listings[index];
         require(l.owern == owner, "Only owner can remove");
         require(l.status == STATUS.OPEN, "status is not open");
         emit CloseListing(l.owner, index, address(0), l.tokenaddress, l.tokenid, l.price);
@@ -87,7 +87,7 @@ contract NFTExchange is Ownable{
     }
     
     function _removeFromListing(uint256 index) internal {
-        Listing l storage = listings[index];
+        Listing storage l = listings[index];
         l.status = STATUS.CLOSED;
         openings.push(index);
     }
