@@ -56,6 +56,7 @@ contract NFTExchange is Ownable{
         uint index;
         if (openings.length > 0) {
             index = openings.pop();
+            listings[index] = l;
         } else {
             index = listings.length;
             listings.push(l);
