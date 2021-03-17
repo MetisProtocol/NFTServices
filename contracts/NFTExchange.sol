@@ -1,11 +1,12 @@
 pragma solidity ^0.6.0;
 
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract NFTExchange is Ownable{
+contract NFTExchange is Ownable, IERC721Receiver{
     
     using SafeMath for uint256;
 
@@ -21,7 +22,7 @@ contract NFTExchange is Ownable{
         uint expiry; // must finish before the expiry, 0 if infinite 
         uint timestamp; // last updated timestamp
         address tokenaddress;  // token address
-        address tokenid;  // id
+        uint256 tokenid;  // id
         uint256 price;
     }
     
@@ -36,8 +37,9 @@ contract NFTExchange is Ownable{
     /// add a new listing to the list
     function addListing(address tokenaddr, uint256 tokenid, uint256 expiry, uint256 price) public {
 
+        require(price > 0, "price should be > 0");
         address owner = msg.sender;
-        Listing l;
+        Listing memory l;
         l.owner = owner;
         l.expiry = expiry;
         l.timestamp = now;
@@ -45,17 +47,18 @@ contract NFTExchange is Ownable{
         l.tokenid = tokenid;
         l.status = STATUS.OPEN;
         l.price = price;
-        IERC721 token = IERC721(tokendaddr);
+        IERC721 token = IERC721(tokenaddr);
 
-        require(token.transferFrom(owner, address(this), tokenid), "Token transfer failed");
+        token.safeTransferFrom(owner, address(this), tokenid);
         _addToListing(l);
     }
 
-    function _addToListing(Listing l) internal {
+    function _addToListing(Listing memory l) internal {
 
         uint index;
         if (openings.length > 0) {
-            index = openings.pop();
+            index = openings[openings.length - 1];
+            openings.pop();
             listings[index] = l;
         } else {
             index = listings.length;
@@ -65,13 +68,13 @@ contract NFTExchange is Ownable{
     }
 
     function closeListing(uint256 index, address purchaser) public {
+        require(purchaser == msg.sender, "only purchaser can close the listing");
 
-        address owner = msg.sender;
         Listing memory l = listings[index];
         require(l.status == STATUS.OPEN, "status is not open");
         require(settlementToken.transferFrom(purchaser, l.owner, l.price), "fund transfer failed");
         IERC721 token = IERC721(l.tokenaddress);
-        require(token.transfer(purchaser, l.tokenid), "token transfer failed");
+        token.safeTransferFrom(address(this), purchaser, l.tokenid);
         emit CloseListing(l.owner, index, purchaser, l.tokenaddress, l.tokenid, l.price);
         _removeFromListing(index);
     }
@@ -80,9 +83,11 @@ contract NFTExchange is Ownable{
 
         address owner = msg.sender;
         Listing memory l = listings[index];
-        require(l.owern == owner, "Only owner can remove");
+        require(l.owner == owner, "Only owner can remove");
         require(l.status == STATUS.OPEN, "status is not open");
-        emit CloseListing(l.owner, index, address(0), l.tokenaddress, l.tokenid, l.price);
+        IERC721 token = IERC721(l.tokenaddress);
+        token.safeTransferFrom(address(this), owner, l.tokenid);
+        emit CloseListing(l.owner, index, address(0), l.tokenaddress, l.tokenid, 0);
         _removeFromListing(index);
     }
     
@@ -90,5 +95,8 @@ contract NFTExchange is Ownable{
         Listing storage l = listings[index];
         l.status = STATUS.CLOSED;
         openings.push(index);
+    }
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) override external returns (bytes4){
+        return IERC721Receiver.onERC721Received.selector;
     }
 }
